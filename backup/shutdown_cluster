@@ -1,0 +1,45 @@
+#!/bin/bash
+
+function shutdownproc {
+
+echo "Stopping Dependent Services ... ";
+/etc/init.d/httpd stop
+
+echo "Unmounting FS ... ";
+/bin/umount -f /owncloud_data
+
+echo "Issuing power off for nodes ... ";
+cexec poweroff -p -q
+
+echo "Waiting for nodes to be shutdown ... ";
+sleep 1m
+
+echo "Powering down master node ... ";
+poweroff -p -q
+
+}
+
+
+
+echo
+echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+echo "@@                                                                                   @@"
+echo "@@  You are about to power down entire cluster ... Are you absolutely Sure ??? {Y/n} @@"
+echo "@@                                                                                   @@"
+echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+echo
+read UR
+
+if [ "$UR" == "Y" ]
+then
+	echo
+	echo "Powering down entire cluster... ";
+	echo
+	shutdownproc;
+else
+	echo
+	echo "Aborted ... ";
+	echo
+fi
+
+exit

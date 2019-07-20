@@ -1,0 +1,164 @@
+#!/bin/bash
+
+COMMAND=$1;
+USR=$2;
+ARG=$3;
+
+USRGRP=cluster;
+KEYDIR=/userkey;
+CMDIR=/commands;
+
+function create {
+	if [ -z $ARG ]; then
+		ARG="welcome";
+	fi
+	echo
+	$CMDIR/user_add $USR;
+	echo "Done";
+}
+
+function delete {
+	echo "Removing User : $USR ...";
+	$CMDIR/user_remove $USR $ARG;		
+	if [ -z $(cat /etc/passwd | grep $USR) ]; then
+		echo "User Remove Successful.";
+	else
+		echo "User Remove Failed...";
+	fi
+}
+
+function check {
+	if [ -z $(cat /etc/passwd | grep $USR) ]; then
+		echo "User $USR not found ...."
+	else
+		echo "User $USR exists..."
+		exit 1
+	fi
+	echo
+}
+
+function authorize_user {
+	$CMDIR/user_authenticate $USR;
+	echo "User authorized...";
+}
+
+function sync_user_info {
+	echo "Updating user information throughout the cluster...";
+	if type syncusrinfo > /dev/null; then
+		syncusrinfo;
+		echo "Done";
+	else
+		echo "User sync command 'syncusrinfo' not found. Sync user manually" ;
+	fi
+	echo
+}
+
+function map_cloud_drive {
+	if  [ -z $ARG ]; then
+		echo "Cloud location empty...";
+		exit;
+	elif [ ! -d "$ARG" ]; then
+		echo "Invalid Cloud location ... Path not found.";
+		exit;
+	fi
+	echo "Mapping cloud directory ...";
+	mkdir /home/$USR/cloud_space;
+	chown $USR:$USR /home/$USR/cloud_space;
+	$CMDIR/mount_cloud $USR $ARG >> /home/$USR/.bashrc;
+	echo "Done";
+	echo
+}
+
+function add {
+	echo
+	echo "Checking if $USR exists ...";
+	check;
+	echo
+	echo "Creating User $USR ...";
+	create;
+	echo
+#	echo "Authorizing User ...";
+#	authorize_user > /dev/null;
+#	echo
+	echo "Propagating New User $USR ...";
+	sync_user_info;
+	echo
+	echo "New User: $USR Creation Successful.";
+}
+
+function list_users {
+# 	echo "All User in Cluster Group:"
+	grep 'cluster' /etc/group | cut -d ":" -f4 | tr ',' '\n';
+}
+
+function usage {
+	echo
+	echo "Usage: $0 [COMMAND] [USR NAME] [OPTION]"
+	echo
+	echo "Command:"
+	echo "         -a, --add       	Create User [User Name] + "
+	echo "                         	Generae SSH key + " 
+	echo "                         	propagate key throughout the cluster"
+	echo "         -D, --delete    	Delete User [User Name] [-r {Remove Home Directory}]"
+	echo "         -c, --Create    	Create User [User Name] [password {optional|default password=welcome}]"
+	echo "         -s, --sync      	Propagate SSH key for [User Name] throughout the cluster"
+	echo "         -f, --find      	Check if [User Name] already exists"
+	echo "         -l, --list      	List all users in Cluster group"
+	echo "         -m, --map        Map Cloud space to 'cloud_space' in home directory. [User Name] [Cloud Directory]"
+	echo "                          {READ ONLY ACCESS}"
+	echo
+        exit 1
+}
+
+#==========================================
+# checking
+#==========================================
+if [ -z $COMMAND ]; then
+	echo "Invalid or Empty COMMAND..."
+	usage;
+elif [ "$COMMAND" == "-s" ]; then
+	echo "Do nothing" > /dev/null;
+elif [ "$COMMAND" == "--sync" ]; then
+	echo "Do nothing" > /dev/null;
+elif [ "$COMMAND" == "-l" ]; then
+	echo "Do nothing" > /dev/null;
+elif [ "$COMMAND" == "--list" ]; then
+	echo "Do nothing" > /dev/null;
+elif [ -z $USR ]; then
+	echo "Missing User Name ..." 
+	usage;
+fi
+
+# let see how we were called
+case "$COMMAND" in
+	--add|-a)
+ 		add
+	;;
+	--create|-c)
+		create
+	;;
+	--delete|-D)
+		if [ -z $ARG ]; then
+			delete;
+		elif [ $ARG == "-r" ]; then
+			delete -r;
+		fi
+	;;
+	--sync|-s)
+		sync_user_info;
+	;;
+	--find|-f)
+		check;
+	;;
+	--list|-l)
+		list_users;
+	;;
+	--map|-m)
+		map_cloud_drive;
+	;;
+	*)
+		usage;
+esac
+
+
+exit

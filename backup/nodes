@@ -1,0 +1,5 @@
+# NODES
+
+node1.arun-hpcc.ru.ac.bd np=4 fast lowmem infiniband
+node2.arun-hpcc.ru.ac.bd np=4 fast lowmem infiniband
+node3.arun-hpcc.ru.ac.bd np=16 fast largemem

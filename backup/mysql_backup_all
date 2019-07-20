@@ -1,0 +1,27 @@
+#!/bin/bash             
+
+LOCATION=/storage/dbbackup
+FILENAME=DB_Backup-$(date +%F_%H-%M);
+LOG=$LOCATION/backup.log;
+
+cd $LOCATION;
+touch backup.log;
+
+echo >> $LOG;
+echo "Starting Database Backup : $(date)" >> $LOG;
+
+echo "$(date) : Cleaning old files ..." >> $LOG;
+find $LOCATION/ -name "DB_Backup*.tar.lbz2" -mtime +15 -exec rm -rf {} \;
+
+echo "$(date) : Getting Database Backup ..." >> $LOG;
+mysqldump -ubackupagent -p8@ckup@g3nt --all-databases > $LOCATION/$FILENAME.sql;
+
+echo "$(date) : Compressing backup file ..." >> $LOG;
+tar -cf $FILENAME.sql.tar.lbz2 $FILENAME.sql -I lbzip2;
+
+echo "$(date) : Removing temprary files ..." >> $LOG;
+rm -rf $FILENAME.sql;
+
+echo "Backup Complete : $(date)" >> $LOG;
+
+exit

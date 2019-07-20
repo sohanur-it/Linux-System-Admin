@@ -1,0 +1,16 @@
+#!/bin/bash
+
+USR=$1;
+USRDIR=$2;
+
+if [ -z $1 ]; then
+	echo "User not defined ...";
+	exit;
+elif [ -z $2 ]; then
+	echo "Cloud location not defined ...";
+	exit;
+fi
+
+echo "mount -o ro $USRDIR /home/$USR/cloud_space";
+
+exit;

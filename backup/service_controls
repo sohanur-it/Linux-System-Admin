@@ -1,0 +1,28 @@
+#!/bin/bash
+
+CHKSERVICE="/usr/sbin/chkservice";
+
+ARG=$1;
+SRV=$2;
+
+function usage(){
+	echo "Usage: $0 [Command] [Args]";
+	echo "		Command: -s | status";
+	echo "		Args: Arguments for Command";
+	echo;
+	exit 1;
+}
+
+if [ -z "$ARG" ];
+then
+	usage;
+fi
+
+case "$ARG" in
+# Check Status
+	-s | status )
+		$CHKSERVICE $SRV;
+	;;
+esac
+
+exit;

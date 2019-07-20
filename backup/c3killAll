@@ -1,0 +1,9 @@
+#!/bin/bash
+
+for n in $(ps axu | grep python | grep cexec | awk '{ print $2 }');
+do 
+	echo $n; 
+	kill -9 $n;
+done
+
+exit;

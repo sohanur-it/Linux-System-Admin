@@ -1,0 +1,11 @@
+
+#!/bin/sh
+
+for f in passwd shadow group;
+do
+	cpush /etc/$f /etc;
+done
+echo "User info synced"
+exit;
+
+

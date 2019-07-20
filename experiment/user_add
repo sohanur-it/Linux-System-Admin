@@ -1,0 +1,50 @@
+
+#!/bin/bash
+
+USR=$1;
+PASS=$2;
+GRP=$3;
+
+KEYLOC=/userkey;
+
+if [ -z $USR ]; then
+	echo "User name can not be empty...";
+	exit;
+fi
+if [ -z $PASS ]; then
+	PASS="bioinformatics";
+fi
+if [ -z $GRP ]; then
+	GRP="cluster";
+fi
+
+echo 
+echo "Creating user : $USR";
+groupadd $GRP
+useradd -G $GRP -p $(openssl passwd $PASS) $USR;
+
+
+echo "Setting up base directories...";
+mkdir -p $KEYLOC/$USR;
+chmod 766 $KEYLOC;
+chown -R $USR:$USR $KEYLOC/$USR;
+chmod 700 $KEYLOC/$USR;
+mkdir /home/$USR/.ssh;
+chown -R $USR:$USR /home/$USR/.ssh;
+chmod 700 /home/$USR/.ssh;
+
+echo "Authorizing User ...";
+su -c 'ssh-keygen -t rsa -q -f /tmp/user-key -N ""' $USR;
+
+mv /tmp/user-key* $KEYLOC/$USR/.;
+cp $KEYLOC/$USR/user-key /home/$USR/.ssh/id_rsa;
+cp $KEYLOC/$USR/user-key.pub /home/$USR/.ssh/id_rsa.pub;
+chown -R $USR:$USR /home/$USR/.ssh/id_rsa*;
+chmod 600 /home/$USR/.ssh/id_rsa;
+chmod 644 /home/$USR/.ssh/id_rsa.pub;
+cat /home/$USR/.ssh/id_rsa.pub >> /home/$USR/.ssh/authorized_keys;
+chown $USR:$USR /home/$USR/.ssh/authorized_keys;
+chmod 644 /home/$USR/.ssh/authorized_keys;
+chown -R $USR:$USR /home/$USR;
+echo "all actions done sucessfully"
+exit

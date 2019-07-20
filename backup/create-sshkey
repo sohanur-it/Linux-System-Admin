@@ -1,0 +1,8 @@
+#!/bin/bash
+
+USER=`whoami`;
+PASSCODE="arun-hpcc";
+
+ssh-keygen -t rsa -q -f /tmp/$USER-key -N "$PASSCODE";
+
+exit

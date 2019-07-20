@@ -1,0 +1,32 @@
+#!/bin/bash
+
+SRV="";
+SRV_Name=$1;
+SRV_List="named dhcpd rpcbind nfs httpd mysql crond";
+
+function usage(){
+	echo "Usage: $0 [service1 service2 ...] | [all {Default}]"
+	exit 1;
+}
+
+if [ -n "$SRV_Name" ];
+then
+	SRV=$SRV_Name;
+elif [ "$SRV_Name" != "all" ] || [ -z "$SRV_Name" ];
+then
+	SRV=$SRV_List;
+else
+	usage;
+fi
+
+for s in $SRV;
+do
+	echo "=================";
+	echo "Checking $s ...";
+	echo "-----------------";
+	service $s status;
+	echo; echo;
+	sleep 1;
+done
+
+exit;

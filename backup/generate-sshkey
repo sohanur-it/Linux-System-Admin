@@ -1,0 +1,5 @@
+#!/bin/bash
+
+su -c "/home/$1/create-sshkey" $1;
+
+exit

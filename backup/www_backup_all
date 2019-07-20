@@ -1,0 +1,21 @@
+#!/bin/bash             
+
+LOCATION=/storage/webbackup
+FILENAME=WWW_Backup-$(date +%F_%H-%M);
+LOG=$LOCATION/backup.log;
+
+cd $LOCATION;
+touch backup.log;
+
+echo >> $LOG;
+echo "Starting Database Backup : $(date)" >> $LOG;
+
+echo "$(date) : Cleaning old files ..." >> $LOG;
+find $LOCATION/ -name "WWW_Backup*.tar.lbz2" -mtime +15 -exec rm -rf {} \;
+
+echo "$(date) : Compressing new files for backup..." >> $LOG;
+tar -cf $FILENAME.sql.tar.lbz2 /var/www/html -I lbzip2;
+
+echo "Backup Complete : $(date)" >> $LOG;
+
+exit

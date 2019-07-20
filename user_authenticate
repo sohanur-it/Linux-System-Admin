@@ -1,0 +1,28 @@
+
+
+#!/bin/bash
+
+USR=$1;
+NODES=/commands/nodes;
+
+if [ -z $USR ]; then
+	echo "User name can not be empty...";
+	exit;
+fi
+
+echo "Sending authorization token...";
+for n in `cat $NODES | awk '{ print $1 }'`
+do 
+        if [[ ${n:0:1} != "#" ]]; then
+                echo "Node: $n";
+                ssh-keyscan -H $n >> /home/$USR/.ssh/known_hosts;
+        fi; 
+done;
+#ssh-keyscan -H master-vm >> /home/$USR/.ssh/known_hosts;
+chown $USR:$USR /home/$USR/.ssh/known_hosts;
+chmod 644 /home/$USR/.ssh/known_hosts;
+echo "Authorization Updated";
+echo "Done";
+
+exit
+

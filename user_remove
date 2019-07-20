@@ -1,0 +1,28 @@
+#!/bin/bash
+
+USR=$1;
+ARG=$2;
+RES="N";
+
+if [ -z $1 ]; then
+	echo "User not defined...";
+	exit;
+fi
+
+if [ $ARG == "-r" ]; then
+	userdel $ARG $USR;
+else
+	echo "Removing User: $USR parmanently... Are you sure? [Y/N]";
+	read RES;
+	if [ $RES == "Y" ] || [ $RES == "y" ]; then
+		echo "Removing ...";
+		userdel -r $USR;
+		rm -rf /userkey/$USR /tmp/$USR*;
+		echo "Updating user information throughout the cluster...";
+		syncinfo>/dev/null;
+		echo "Done";
+	else
+		echo "User Removal Aborted...";
+	fi
+fi
+exit
